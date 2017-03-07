@@ -16,7 +16,9 @@ Medical Segmentation can be done manually by someone trained to recognized the f
   - k-Means
   - Fuzzy C-Mean
   - Expectation Maximization
-and Hybrid Methods  
+- Hybrid Methods
+
+
 
 
 
