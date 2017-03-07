@@ -1,37 +1,22 @@
-## Welcome to GitHub Pages
+# Spine Segmentation in 3D Slicer
+## Final Project for CISC 472, Medical Informatics
+### By Hannah Greer and Hillary Elrick
 
-You can use the [editor on GitHub](https://github.com/hil-elrick/spine-segmentation-project/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+From Wikipedia:
+"Segmentation is the process of partitioning an image into different segments. More precisely, image segmentation is the process of assigning a label to every pixel in an image such that pixels with the same label share certain characteristics. The goal of segmentation is to simplify and/or change the representation of an image into something that is more meaningful and easier to analyze. In medical imaging, these segments often correspond to different tissue classes, organs, pathologies, or other biologically relevant structures. Medical image segmentation is made difficult by low contrast, noise, and other imaging ambiguities."
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Medical Segmentation can be done manually by someone trained to recognized the features of interest, automatically by an algorithm, or semi-automatically. Methods for automatic segmentation include:
+- Region Based Methods
+  - Thresholding
+  - Region Growing
+- Classification Methods
+  - k-Nearest Neighbours
+  - Maximum Likelihood 
+- Clustering Mehods
+  - k-Means
+  - Fuzzy C-Mean
+  - Expectation Maximization
+and Hybrid Methods  
 
-### Markdown
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/hil-elrick/spine-segmentation-project/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
