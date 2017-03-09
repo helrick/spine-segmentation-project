@@ -3,6 +3,9 @@ import unittest
 import vtk, qt, ctk, slicer
 from slicer.ScriptedLoadableModule import *
 import logging
+import slicer.util
+import SimpleITK as sitk
+import stikUtils
 
 #
 # SpineSeg
@@ -241,6 +244,15 @@ class SpineSegTest(ScriptedLoadableModuleTest):
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
 
+  def loadAndSmoothImageData(self,thePath):
+    slicer.util.loadVolume(thePath) #must be defined with forward slashes
+    inImage = stikUtils.PullFromSlicer('007') # currently hardcoded, but could be changed to be a parameter of the function
+    #check out: https://itk.org/Wiki/ITK/Examples/Smoothing/SmoothingRecursiveGaussianImageFilter
+    filter = stik.SmoothingRecursiveGaussianImageFilter() #Using a clustering technique
+    outImage = filter.Execute(inImage)
+    sitkUtils.PushToSlicer(outImage, 'outputImage')
+
+
   def setUp(self):
     """ Do whatever is needed to reset the state - typically a scene clear will be enough.
     """
@@ -263,27 +275,4 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     module.  For example, if a developer removes a feature that you depend on,
     your test should break so they know that the feature is needed.
     """
-
-    self.delayDisplay("Starting the test")
-    #
-    # first, get some data
-    #
-    import urllib
-    downloads = (
-        ('http://slicer.kitware.com/midas3/download?items=5767', 'FA.nrrd', slicer.util.loadVolume),
-        )
-
-    for url,name,loader in downloads:
-      filePath = slicer.app.temporaryPath + '/' + name
-      if not os.path.exists(filePath) or os.stat(filePath).st_size == 0:
-        logging.info('Requesting download %s from %s...\n' % (name, url))
-        urllib.urlretrieve(url, filePath)
-      if loader:
-        logging.info('Loading %s...' % (name,))
-        loader(filePath)
-    self.delayDisplay('Finished with download and loading')
-
-    volumeNode = slicer.util.getNode(pattern="FA")
-    logic = SpineSegLogic()
-    self.assertIsNotNone( logic.hasImageData(volumeNode) )
-    self.delayDisplay('Test passed!')
+    self.loadAndSmoothImageData(self, '')
