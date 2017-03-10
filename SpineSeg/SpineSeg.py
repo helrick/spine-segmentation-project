@@ -6,6 +6,8 @@ import logging
 import slicer.util
 import SimpleITK as sitk
 import sitkUtils
+import numpy
+
 
 #
 # SpineSeg
@@ -60,10 +62,10 @@ class SpineSegWidget(ScriptedLoadableModuleWidget):
     #
     self.inputSelector = slicer.qMRMLNodeComboBox()
     self.inputSelector.nodeTypes = ["vtkMRMLScalarVolumeNode"]
-    self.inputSelector.selectNodeUponCreation = True
+    self.inputSelector.selectNodeUponCreation = False
     self.inputSelector.addEnabled = False
     self.inputSelector.removeEnabled = False
-    self.inputSelector.noneEnabled = False
+    self.inputSelector.noneEnabled = True
     self.inputSelector.showHidden = False
     self.inputSelector.showChildNodeTypes = False
     self.inputSelector.setMRMLScene( slicer.mrmlScene )
@@ -252,6 +254,34 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     outImage = filter.Execute(inImage)
     sitkUtils.PushToSlicer(outImage, 'outputImage')
 
+  #TODO: Fix this, it doesn't work :(
+  def thresholdImageData(self,lower,upper):
+    imageNode = slicer.util.getNode('outputImage')
+    #note: look at the ConnectedThresholdImageFilter if semi-automatic thresholding allowed
+    filter =  sitk.BinaryThresholdImageFilter()
+    filter.SetLowerThreshold(lower)
+    filter.SetUpperThreshold(upper)
+    filter.SetInsideValue = lower
+    filter.SetOutsideValue = 0
+    thresholdedImage = filter.Execute(imageNode,lower,upper,1,0)
+    sitkUtils.PushToSlicer(thresholdedImage,'thresholdedImage')
+
+  def getMaxIntensity(self):
+    imageNode = slicer.util.getNode('outputImage')
+    imageData = imageNode.GetImageData()
+    shapeData = list(imageData.GetDimensions())
+    shapeData.reverse()
+    imageArray = vtk.util.numpy_support.vtk_to_numpy(imageData.GetPointData().GetScalars()).reshape(shapeData)
+    return numpy.max(imageArray)
+
+  def getMinIntensity(self):
+    imageNode = slicer.util.getNode('outputImage')
+    imageData = imageNode.GetImageData()
+    shapeData = list(imageData.GetDimensions())
+    shapeData.reverse()
+    imageArray = vtk.util.numpy_support.vtk_to_numpy(imageData.GetPointData().GetScalars()).reshape(shapeData)
+    return numpy.min(imageArray)
+
 
   def setUp(self):
     """ Do whatever is needed to reset the state - typically a scene clear will be enough.
@@ -276,3 +306,11 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     your test should break so they know that the feature is needed.
     """
     self.loadAndSmoothImageData('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
+    #self.loadAndSmoothImageData('C:/Users/Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
+    max = self.getMaxIntensity()
+    min = self.getMinIntensity()
+    print 'The Maximum Intensity is: ' + str(max)
+    print 'The Minimum Intensity is: ' + str(min)
+    #test to threshold all pixels in top 20% of intensity range of ct
+    #uncomment once the BinaryThresholdFilter issue is solved
+    #self.thresholdImageData(max/5, max/1)
