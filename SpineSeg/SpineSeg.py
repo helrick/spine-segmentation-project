@@ -5,7 +5,7 @@ from slicer.ScriptedLoadableModule import *
 import logging
 import slicer.util
 import SimpleITK as sitk
-import stikUtils
+import sitkUtils
 
 #
 # SpineSeg
@@ -246,9 +246,9 @@ class SpineSegTest(ScriptedLoadableModuleTest):
 
   def loadAndSmoothImageData(self,thePath):
     slicer.util.loadVolume(thePath) #must be defined with forward slashes
-    inImage = stikUtils.PullFromSlicer('007') # currently hardcoded, but could be changed to be a parameter of the function
+    inImage = sitkUtils.PullFromSlicer('007') # currently hardcoded, but could be changed to be a parameter of the function
     #check out: https://itk.org/Wiki/ITK/Examples/Smoothing/SmoothingRecursiveGaussianImageFilter
-    filter = stik.SmoothingRecursiveGaussianImageFilter() #Using a clustering technique
+    filter = sitk.SmoothingRecursiveGaussianImageFilter() #Using a clustering technique
     outImage = filter.Execute(inImage)
     sitkUtils.PushToSlicer(outImage, 'outputImage')
 
@@ -275,4 +275,4 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     module.  For example, if a developer removes a feature that you depend on,
     your test should break so they know that the feature is needed.
     """
-    self.loadAndSmoothImageData(self, '')
+    self.loadAndSmoothImageData('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
