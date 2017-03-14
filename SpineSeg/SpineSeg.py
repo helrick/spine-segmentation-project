@@ -246,13 +246,25 @@ class SpineSegTest(ScriptedLoadableModuleTest):
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
 
-  def loadAndSmoothImageData(self,thePath):
+  def loadAndSmoothImageData(self,thePath, func):
     slicer.util.loadVolume(thePath) #must be defined with forward slashes
     inImage = sitkUtils.PullFromSlicer('007') # currently hardcoded, but could be changed to be a parameter of the function
     #check out: https://itk.org/Wiki/ITK/Examples/Smoothing/SmoothingRecursiveGaussianImageFilter
-    filter = sitk.SmoothingRecursiveGaussianImageFilter() #Using a clustering technique
+    filter = func #Using a clustering technique
     outImage = filter.Execute(inImage)
     sitkUtils.PushToSlicer(outImage, 'outputImage')
+
+  # Dispatches the calls to loadAndSmoothImageData() with different filters
+  # These Filters can be found here: https://www.slicer.org/wiki/Documentation/Nightly/Modules/SimpleFilters
+  def dispatchFilters(self, thePath):
+    filters = { 'SmoothingRG': sitk.SmoothingRecursiveGaussianImageFilter(),
+                'DiscreteG': sitk.DiscreteGaussianImageFilter(),
+                'GradientRG': sitk.GradientRecursiveGaussianImageFilter()}
+    for name, func in filters.iteritems():
+      print func
+      self.loadAndSmoothImageData(thePath, func)
+    return 0
+
 
   #TODO: Fix this, it doesn't work :(
   def thresholdImageData(self,lower,upper):
@@ -295,17 +307,10 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     self.test_SpineSeg1()
 
   def test_SpineSeg1(self):
-    """ Ideally you should have several levels of tests.  At the lowest level
-    tests should exercise the functionality of the logic with different inputs
-    (both valid and invalid).  At higher levels your tests should emulate the
-    way the user would interact with your code and confirm that it still works
-    the way you intended.
-    One of the most important features of the tests is that it should alert other
-    developers when their changes will have an impact on the behavior of your
-    module.  For example, if a developer removes a feature that you depend on,
-    your test should break so they know that the feature is needed.
-    """
-    self.loadAndSmoothImageData('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
+    # Perhaps an idea to work on is to try a few methods and compare the outputs of the segmentations?
+    # Some sort of average of the methods that appear to work well could help us to refine our segmentation...
+    #TODO: Fix this to work better with the thresholding/decide next steps
+    self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
     #self.loadAndSmoothImageData('C:/Users/Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
     max = self.getMaxIntensity()
     min = self.getMinIntensity()
