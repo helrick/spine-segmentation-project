@@ -252,7 +252,14 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     #check out: https://itk.org/Wiki/ITK/Examples/Smoothing/SmoothingRecursiveGaussianImageFilter
     filter = func #Using a clustering technique
     outImage = filter.Execute(inImage)
+    print "For the " + str(func) + "function."
     sitkUtils.PushToSlicer(outImage, 'outputImage')
+    max = self.getMaxIntensity()
+    min = self.getMinIntensity()
+    print 'The Maximum Intensity is: ' + str(max)
+    print 'The Minimum Intensity is: ' + str(min)
+    self.thresholdImageData(int(max / 5), int(max))
+    print "/n"
 
   def loadAndSmooth(self,thePath):
     slicer.util.loadVolume(thePath) #must be defined with forward slashes
@@ -320,8 +327,9 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     #TODO: Fix this to work better with the thresholding/decide next steps
     self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
     #self.loadAndSmooth('C:/Users/Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
+    #self.loadAndSmooth('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
     max = self.getMaxIntensity()
     min = self.getMinIntensity()
     print 'The Maximum Intensity is: ' + str(max)
     print 'The Minimum Intensity is: ' + str(min)
-    self.thresholdImageData(int(max/5),int(max))
+    self.thresholdImageData(int(max/5),int(max)) # perhaps add a slider for editing the max divider?
