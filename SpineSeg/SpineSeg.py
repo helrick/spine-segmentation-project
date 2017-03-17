@@ -254,6 +254,14 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     outImage = filter.Execute(inImage)
     sitkUtils.PushToSlicer(outImage, 'outputImage')
 
+  def loadAndSmooth(self,thePath):
+    slicer.util.loadVolume(thePath) #must be defined with forward slashes
+    inImage = sitkUtils.PullFromSlicer('007') # currently hardcoded, but could be changed to be a parameter of the function
+    #check out: https://itk.org/Wiki/ITK/Examples/Smoothing/SmoothingRecursiveGaussianImageFilter
+    filter = sitk.SmoothingRecursiveGaussianImageFilter() #Using a clustering technique
+    outImage = filter.Execute(inImage)
+    sitkUtils.PushToSlicer(outImage, 'outputImage')
+
   # Dispatches the calls to loadAndSmoothImageData() with different filters
   # These Filters can be found here: https://www.slicer.org/wiki/Documentation/Nightly/Modules/SimpleFilters
   def dispatchFilters(self, thePath):
@@ -268,7 +276,7 @@ class SpineSegTest(ScriptedLoadableModuleTest):
 
   #TODO: Fix this, it doesn't work :(
   def thresholdImageData(self,lower,upper):
-    imageNode = slicer.util.getNode('outputImage')
+    imageNode = sitkUtils.PullFromSlicer('007')
     #note: look at the ConnectedThresholdImageFilter if semi-automatic thresholding allowed
     filter =  sitk.BinaryThresholdImageFilter()
     filter.SetLowerThreshold(lower)
@@ -311,11 +319,9 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     # Some sort of average of the methods that appear to work well could help us to refine our segmentation...
     #TODO: Fix this to work better with the thresholding/decide next steps
     self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
-    #self.loadAndSmoothImageData('C:/Users/Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
+    #self.loadAndSmooth('C:/Users/Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
     max = self.getMaxIntensity()
     min = self.getMinIntensity()
     print 'The Maximum Intensity is: ' + str(max)
     print 'The Minimum Intensity is: ' + str(min)
-    #test to threshold all pixels in top 20% of intensity range of ct
-    #uncomment once the BinaryThresholdFilter issue is solved
-    #self.thresholdImageData(max/5, max/1)
+    self.thresholdImageData(int(max/5),int(max))
