@@ -40,4 +40,7 @@ The small spaces between the vertebrae are called intravertbral canals.
   - http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0139323
   
 
-
+Current Progress:
+  Currently, we have an image which is filtered and then a threshold is applied to it, leaving us with a grey and white image. This appears to be similar to the shape of a spine. 
+Next Steps:
+  Now we need to refine the program to work on other spine data. This method is currently far from perfect.
