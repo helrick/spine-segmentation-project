@@ -57,6 +57,18 @@ class SpineSegWidget(ScriptedLoadableModuleWidget):
     # Layout within the dummy collapsible button
     parametersFormLayout = qt.QFormLayout(parametersCollapsibleButton)
 
+    self.fiducialSelector = slicer.qMRMLNodeComboBox()
+    self.fiducialSelector.nodeTypes = ["vtkMRMLFiducialListNode"]
+    self.fiducialSelector.selectNodeUponCreation = True
+    self.fiducialSelector.addEnabled = True
+    self.fiducialSelector.removeEnabled = True
+    self.fiducialSelector.noneEnabled = True
+    self.fiducialSelector.showHidden = False
+    self.fiducialSelector.showChildNodeTypes = False
+    self.fiducialSelector.setMRMLScene( slicer.mrmlScene )
+    self.fiducialSelector.setToolTip( "Choose Fiducials for  Seeding" )
+    parametersFormLayout.addRow("Choose Fiducials: ", self.fiducialSelector)
+
     #
     # input volume selector
     #
@@ -87,6 +99,9 @@ class SpineSegWidget(ScriptedLoadableModuleWidget):
     self.outputSelector.setToolTip( "Pick the output to the algorithm." )
     parametersFormLayout.addRow("Output Volume: ", self.outputSelector)
 
+
+
+
     #
     # threshold value
     #
@@ -97,14 +112,6 @@ class SpineSegWidget(ScriptedLoadableModuleWidget):
     self.imageThresholdSliderWidget.value = 0.5
     self.imageThresholdSliderWidget.setToolTip("Set threshold value for computing the output image. Voxels that have intensities lower than this value will set to zero.")
     parametersFormLayout.addRow("Image threshold", self.imageThresholdSliderWidget)
-
-    #
-    # check box to trigger taking screen shots for later use in tutorials
-    #
-    self.enableScreenshotsFlagCheckBox = qt.QCheckBox()
-    self.enableScreenshotsFlagCheckBox.checked = 0
-    self.enableScreenshotsFlagCheckBox.setToolTip("If checked, take screen shots for tutorials. Use Save Data to write them to disk.")
-    parametersFormLayout.addRow("Enable Screenshots", self.enableScreenshotsFlagCheckBox)
 
     #
     # Apply Button
@@ -318,8 +325,8 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     # Perhaps an idea to work on is to try a few methods and compare the outputs of the segmentations?
     # Some sort of average of the methods that appear to work well could help us to refine our segmentation...
     #TODO: Fix this to work better with the thresholding/decide next steps
-    self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
-    #self.loadAndSmooth('C:/Users/Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
+    #self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
+    self.loadAndSmooth('C:/Users/Overlord Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
     max = self.getMaxIntensity()
     min = self.getMinIntensity()
     print 'The Maximum Intensity is: ' + str(max)
