@@ -69,46 +69,14 @@ class SpineSegWidget(ScriptedLoadableModuleWidget):
     self.fiducialSelector.setToolTip( "Choose Fiducials for  Seeding" )
     parametersFormLayout.addRow("Choose Fiducials: ", self.fiducialSelector)
 
-    #
-    # input volume selector
-    #
-    self.inputSelector = slicer.qMRMLNodeComboBox()
-    self.inputSelector.nodeTypes = ["vtkMRMLScalarVolumeNode"]
-    self.inputSelector.selectNodeUponCreation = False
-    self.inputSelector.addEnabled = False
-    self.inputSelector.removeEnabled = False
-    self.inputSelector.noneEnabled = True
-    self.inputSelector.showHidden = False
-    self.inputSelector.showChildNodeTypes = False
-    self.inputSelector.setMRMLScene( slicer.mrmlScene )
-    self.inputSelector.setToolTip( "Pick the input to the algorithm." )
-    parametersFormLayout.addRow("Input Volume: ", self.inputSelector)
-
-    #
-    # output volume selector
-    #
-    self.outputSelector = slicer.qMRMLNodeComboBox()
-    self.outputSelector.nodeTypes = ["vtkMRMLScalarVolumeNode"]
-    self.outputSelector.selectNodeUponCreation = True
-    self.outputSelector.addEnabled = True
-    self.outputSelector.removeEnabled = True
-    self.outputSelector.noneEnabled = True
-    self.outputSelector.showHidden = False
-    self.outputSelector.showChildNodeTypes = False
-    self.outputSelector.setMRMLScene( slicer.mrmlScene )
-    self.outputSelector.setToolTip( "Pick the output to the algorithm." )
-    parametersFormLayout.addRow("Output Volume: ", self.outputSelector)
-
-
-
 
     #
     # threshold value
     #
     self.imageThresholdSliderWidget = ctk.ctkSliderWidget()
-    self.imageThresholdSliderWidget.singleStep = 0.1
-    self.imageThresholdSliderWidget.minimum = -100
-    self.imageThresholdSliderWidget.maximum = 100
+    self.imageThresholdSliderWidget.singleStep = 0.5
+    self.imageThresholdSliderWidget.minimum = 1
+    self.imageThresholdSliderWidget.maximum = 10
     self.imageThresholdSliderWidget.value = 0.5
     self.imageThresholdSliderWidget.setToolTip("Set threshold value for computing the output image. Voxels that have intensities lower than this value will set to zero.")
     parametersFormLayout.addRow("Image threshold", self.imageThresholdSliderWidget)
@@ -123,8 +91,7 @@ class SpineSegWidget(ScriptedLoadableModuleWidget):
 
     # connections
     self.applyButton.connect('clicked(bool)', self.onApplyButton)
-    self.inputSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
-    self.outputSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
+    #self.imageThresholdSliderWidget.connect('change(bool)', self.onA)
 
     # Add vertical spacer
     self.layout.addStretch(1)
@@ -136,13 +103,15 @@ class SpineSegWidget(ScriptedLoadableModuleWidget):
     pass
 
   def onSelect(self):
-    self.applyButton.enabled = self.inputSelector.currentNode() and self.outputSelector.currentNode()
+    pass
+
+  def onSliderChange(self):
+    pass
 
   def onApplyButton(self):
-    logic = SpineSegLogic()
-    enableScreenshotsFlag = self.enableScreenshotsFlagCheckBox.checked
+    test = SpineSegTest()
     imageThreshold = self.imageThresholdSliderWidget.value
-    logic.run(self.inputSelector.currentNode(), self.outputSelector.currentNode(), imageThreshold, enableScreenshotsFlag)
+    test.runTest(self,imageThreshold)
 
 #
 # SpineSegLogic
@@ -315,13 +284,13 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     """
     slicer.mrmlScene.Clear(0)
 
-  def runTest(self):
+  def runTest(self, imageThreshold):
     """Run as few or as many tests as needed here.
     """
     self.setUp()
-    self.test_SpineSeg1()
+    self.test_SpineSeg1(imageThreshold)
 
-  def test_SpineSeg1(self):
+  def test_SpineSeg1(self, imageThreshold):
     # Perhaps an idea to work on is to try a few methods and compare the outputs of the segmentations?
     # Some sort of average of the methods that appear to work well could help us to refine our segmentation...
     #TODO: Fix this to work better with the thresholding/decide next steps
@@ -331,4 +300,4 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     min = self.getMinIntensity()
     print 'The Maximum Intensity is: ' + str(max)
     print 'The Minimum Intensity is: ' + str(min)
-    self.thresholdImageData(int(max/5),int(max))
+    self.thresholdImageData(int(max/imageThreshold),int(max))
