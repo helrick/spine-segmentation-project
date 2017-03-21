@@ -325,8 +325,8 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     # Perhaps an idea to work on is to try a few methods and compare the outputs of the segmentations?
     # Some sort of average of the methods that appear to work well could help us to refine our segmentation...
     #TODO: Fix this to work better with the thresholding/decide next steps
-    #self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
-    self.loadAndSmooth('C:/Users/Overlord Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
+    self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
+    #self.loadAndSmooth('C:/Users/O Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
     max = self.getMaxIntensity()
     min = self.getMinIntensity()
     print 'The Maximum Intensity is: ' + str(max)
