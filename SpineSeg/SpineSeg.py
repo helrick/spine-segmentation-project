@@ -109,9 +109,9 @@ class SpineSegWidget(ScriptedLoadableModuleWidget):
     pass
 
   def onApplyButton(self):
-    test = SpineSegTest()
+
     imageThreshold = self.imageThresholdSliderWidget.value
-    test.runTest(self,imageThreshold)
+    test.runTest(self)
 
 #
 # SpineSegLogic
@@ -191,28 +191,17 @@ class SpineSegLogic(ScriptedLoadableModuleLogic):
     annotationLogic = slicer.modules.annotations.logic()
     annotationLogic.CreateSnapShot(name, description, type, 1, imageData)
 
-  def run(self, inputVolume, outputVolume, imageThreshold, enableScreenshots=0):
+  def imagePopUpWindow(self, mssg):
+    msg = qt.QMessageBox()
+    msg.setText(mssg)
+    msg.show()
+    return
+
+  def run(self, imageThreshold):
     """
     Run the actual algorithm
     """
 
-    if not self.isValidInputOutputData(inputVolume, outputVolume):
-      slicer.util.errorDisplay('Input volume is the same as output volume. Choose a different output volume.')
-      return False
-
-    logging.info('Processing started')
-
-    # Compute the thresholded output volume using the Threshold Scalar Volume CLI module
-    cliParams = {'InputVolume': inputVolume.GetID(), 'OutputVolume': outputVolume.GetID(), 'ThresholdValue' : imageThreshold, 'ThresholdType' : 'Above'}
-    cliNode = slicer.cli.run(slicer.modules.thresholdscalarvolume, None, cliParams, wait_for_completion=True)
-
-    # Capture screenshot
-    if enableScreenshots:
-      self.takeScreenshot('SpineSegTest-Start','MyScreenshot',-1)
-
-    logging.info('Processing completed')
-
-    return True
 
 
 class SpineSegTest(ScriptedLoadableModuleTest):
@@ -284,20 +273,38 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     """
     slicer.mrmlScene.Clear(0)
 
-  def runTest(self, imageThreshold):
+  def runTest(self):
     """Run as few or as many tests as needed here.
     """
     self.setUp()
-    self.test_SpineSeg1(imageThreshold)
+    imageThreshold = 5
+    SpineSegLogic.imagePopUpWindow("Starting Test 1")
+    self.test_SpineSeg1()
+    SpineSegLogic.imagePopUpWindow("Starting Test 2")
+    self.test_SpineSeg2()
 
-  def test_SpineSeg1(self, imageThreshold):
+  def test_SpineSeg1(self):
     # Perhaps an idea to work on is to try a few methods and compare the outputs of the segmentations?
     # Some sort of average of the methods that appear to work well could help us to refine our segmentation...
     #TODO: Fix this to work better with the thresholding/decide next steps
-    self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
+    #self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
     #self.loadAndSmooth('C:/Users/O Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
+    self.loadAndSmooth('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
     max = self.getMaxIntensity()
     min = self.getMinIntensity()
     print 'The Maximum Intensity is: ' + str(max)
     print 'The Minimum Intensity is: ' + str(min)
-    self.thresholdImageData(int(max/imageThreshold),int(max))
+    self.thresholdImageData(int(max/5),int(max))
+
+  def test_SpineSeg2(self):
+    # Perhaps an idea to work on is to try a few methods and compare the outputs of the segmentations?
+    # Some sort of average of the methods that appear to work well could help us to refine our segmentation...
+    #TODO: Fix this to work better with the thresholding/decide next steps
+    #self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
+    #self.loadAndSmooth('C:/Users/O Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
+    self.loadAndSmooth('/Users/hannahgreer/Documents/SlicerData/010.CTDC.nrrd')
+    max = self.getMaxIntensity()
+    min = self.getMinIntensity()
+    print 'The Maximum Intensity is: ' + str(max)
+    print 'The Minimum Intensity is: ' + str(min)
+    self.thresholdImageData(int(max/5),int(max))
