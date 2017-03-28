@@ -31,7 +31,7 @@ class SpineSeg(ScriptedLoadableModule):
     self.parent.acknowledgementText = """
     This file was originally developed by Jean-Christophe Fillion-Robin, Kitware Inc.
     and Steve Pieper, Isomics, Inc. and was partially funded by NIH grant 3P41RR013218-12S1.
-""" # replace with organization, grant and thanks.
+"""
 
 #
 # SpineSegWidget
@@ -54,8 +54,27 @@ class SpineSegWidget(ScriptedLoadableModuleWidget):
     parametersCollapsibleButton.text = "Parameters"
     self.layout.addWidget(parametersCollapsibleButton)
 
+
+
+
+
     # Layout within the dummy collapsible button
     parametersFormLayout = qt.QFormLayout(parametersCollapsibleButton)
+
+    #
+    # target volume selector
+    #
+    self.inputSelector = slicer.qMRMLNodeComboBox()
+    self.inputSelector.nodeTypes = ( ("vtkMRMLVolumeNode"), "" )
+    self.inputSelector.selectNodeUponCreation = True
+    self.inputSelector.addEnabled = False
+    self.inputSelector.removeEnabled = False
+    self.inputSelector.noneEnabled = False
+    self.inputSelector.showHidden = False
+    self.inputSelector.showChildNodeTypes = True
+    self.inputSelector.setMRMLScene( slicer.mrmlScene )
+    self.inputSelector.setToolTip( "Pick the input to the algorithm." )
+    parametersFormLayout.addRow("Target Volume: ", self.inputSelector)
 
     self.fiducialSelector = slicer.qMRMLNodeComboBox()
     self.fiducialSelector.nodeTypes = ["vtkMRMLFiducialListNode"]
@@ -68,7 +87,6 @@ class SpineSegWidget(ScriptedLoadableModuleWidget):
     self.fiducialSelector.setMRMLScene( slicer.mrmlScene )
     self.fiducialSelector.setToolTip( "Choose Fiducials for  Seeding" )
     parametersFormLayout.addRow("Choose Fiducials: ", self.fiducialSelector)
-
 
     #
     # threshold value
@@ -118,27 +136,10 @@ class SpineSegWidget(ScriptedLoadableModuleWidget):
 #
 
 class SpineSegLogic(ScriptedLoadableModuleLogic):
-  """This class should implement all the actual
-  computation done by your module.  The interface
-  should be such that other python code can import
-  this class and make use of the functionality without
-  requiring an instance of the Widget.
+  """
   Uses ScriptedLoadableModuleLogic base class, available at:
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
-
-  def hasImageData(self,volumeNode):
-    """This is an example logic method that
-    returns true if the passed in volume
-    node has valid image data
-    """
-    if not volumeNode:
-      logging.debug('hasImageData failed: no volume node')
-      return False
-    if volumeNode.GetImageData() is None:
-      logging.debug('hasImageData failed: no image data in volume node')
-      return False
-    return True
 
   def isValidInputOutputData(self, inputVolumeNode, outputVolumeNode):
     """Validates if the output is not the same as input
@@ -154,34 +155,6 @@ class SpineSegLogic(ScriptedLoadableModuleLogic):
       return False
     return True
 
-  def takeScreenshot(self,name,description,type=-1):
-    # show the message even if not taking a screen shot
-    slicer.util.delayDisplay('Take screenshot: '+description+'.\nResult is available in the Annotations module.', 3000)
-
-    lm = slicer.app.layoutManager()
-    # switch on the type to get the requested window
-    widget = 0
-    if type == slicer.qMRMLScreenShotDialog.FullLayout:
-      # full layout
-      widget = lm.viewport()
-    elif type == slicer.qMRMLScreenShotDialog.ThreeD:
-      # just the 3D window
-      widget = lm.threeDWidget(0).threeDView()
-    elif type == slicer.qMRMLScreenShotDialog.Red:
-      # red slice window
-      widget = lm.sliceWidget("Red")
-    elif type == slicer.qMRMLScreenShotDialog.Yellow:
-      # yellow slice window
-      widget = lm.sliceWidget("Yellow")
-    elif type == slicer.qMRMLScreenShotDialog.Green:
-      # green slice window
-      widget = lm.sliceWidget("Green")
-    else:
-      # default to using the full window
-      widget = slicer.util.mainWindow()
-      # reset the type so that the node is set correctly
-      type = slicer.qMRMLScreenShotDialog.FullLayout
-
     # grab and convert to vtk image data
     qpixMap = qt.QPixmap().grabWidget(widget)
     qimage = qpixMap.toImage()
@@ -191,11 +164,7 @@ class SpineSegLogic(ScriptedLoadableModuleLogic):
     annotationLogic = slicer.modules.annotations.logic()
     annotationLogic.CreateSnapShot(name, description, type, 1, imageData)
 
-  def imagePopUpWindow(self, mssg):
-    msg = qt.QMessageBox()
-    msg.setText(mssg)
-    msg.show()
-    return
+
 
   def run(self, imageThreshold):
     """
@@ -206,7 +175,6 @@ class SpineSegLogic(ScriptedLoadableModuleLogic):
 
 class SpineSegTest(ScriptedLoadableModuleTest):
   """
-  This is the test case for your scripted module.
   Uses ScriptedLoadableModuleTest base class, available at:
   https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
   """
@@ -237,6 +205,15 @@ class SpineSegTest(ScriptedLoadableModuleTest):
       print func
       self.loadAndSmoothImageData(thePath, func)
     return 0
+
+  def imagePopUpWindow(self,mssg):
+    msg = qt.QMessageBox()
+    msg.setText(mssg)
+    import time
+
+    msg.exec_()
+    time.sleep(5)
+    return
 
 
   #TODO: Fix this, it doesn't work :(
@@ -278,9 +255,9 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     """
     self.setUp()
     imageThreshold = 5
-    SpineSegLogic.imagePopUpWindow("Starting Test 1")
+    self.imagePopUpWindow("Starting Test 1")
     self.test_SpineSeg1()
-    SpineSegLogic.imagePopUpWindow("Starting Test 2")
+    self.imagePopUpWindow("Starting Test 2")
     self.test_SpineSeg2()
 
   def test_SpineSeg1(self):
@@ -288,8 +265,8 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     # Some sort of average of the methods that appear to work well could help us to refine our segmentation...
     #TODO: Fix this to work better with the thresholding/decide next steps
     #self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
-    #self.loadAndSmooth('C:/Users/O Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
     self.loadAndSmooth('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
+    #self.loadAndSmooth('C:/Users/O Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
     max = self.getMaxIntensity()
     min = self.getMinIntensity()
     print 'The Maximum Intensity is: ' + str(max)
@@ -300,11 +277,12 @@ class SpineSegTest(ScriptedLoadableModuleTest):
     # Perhaps an idea to work on is to try a few methods and compare the outputs of the segmentations?
     # Some sort of average of the methods that appear to work well could help us to refine our segmentation...
     #TODO: Fix this to work better with the thresholding/decide next steps
-    #self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
+    self.dispatchFilters('/Users/hannahgreer/Documents/SlicerData/007.CTDC.nrrd')
     #self.loadAndSmooth('C:/Users/O Elrick/Documents/School/SlicerData/007.CTDC.nrrd')
-    self.loadAndSmooth('/Users/hannahgreer/Documents/SlicerData/010.CTDC.nrrd')
+    #self.loadAndSmooth('/Users/hannahgreer/Documents/SlicerData/010.CTDC.nrrd')
     max = self.getMaxIntensity()
     min = self.getMinIntensity()
     print 'The Maximum Intensity is: ' + str(max)
     print 'The Minimum Intensity is: ' + str(min)
+    print ''
     self.thresholdImageData(int(max/5),int(max))
